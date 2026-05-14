@@ -5,15 +5,11 @@ import '../enums/workout_type.dart';
 import '../widgets/workout_calendar_graph.dart';
 import '../widgets/workout_form_dialog.dart';
 
-class WorkoutListScreen extends ConsumerWidget {
+class WorkoutListScreen extends StatelessWidget {
   const WorkoutListScreen({super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-    ref
-  ) {
-    final totalWorkouts = ref.watch(workoutProvider).length.toString();
+  Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -41,7 +37,6 @@ class WorkoutListScreen extends ConsumerWidget {
         ),
         body: TabBarView(
           children: [
-            Text(totalWorkouts),
             _WorkoutList(type: WorkoutType.upperBody),
             _WorkoutList(type: WorkoutType.lowerBody),
           ],
@@ -62,37 +57,54 @@ class WorkoutListScreen extends ConsumerWidget {
   }
 }
 
-class _WorkoutList extends StatelessWidget {
+class _WorkoutList extends ConsumerWidget {
   final WorkoutType type;
 
   const _WorkoutList({required this.type});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final rawWorkouts = ref.watch(workoutProvider);
+    final workouts = rawWorkouts.where((w) => w.type == type).toList();
+    if (workouts.isEmpty) {
+      return Center(
+        child: Text("No workouts yet."),
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: 2,
+      itemCount: workouts.length,
       itemBuilder: (context, index) {
+        final workout = workouts[index];
         return Card(
           child: ListTile(
             enabled: false,
-            title: const Text(
-              "workout 1",
+            title: Text(
+              workout.name,
               style: TextStyle(
-                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+                decoration: workout.isCompleted ? TextDecoration.lineThrough : TextDecoration.none,
+                color: workout.isCompleted ? Colors.grey : Colors.white,
               ),
             ),
-            subtitle: const Text(
-              '1 sets',
+            subtitle: Text(
+              workout.sets > 0
+                  ? "${workout.sets} sets x ${workout.reps} reps @ ${workout.weight} kg"
+                  : "No sets added",
               style: TextStyle(
-                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+                color: workout.isCompleted ? Colors.grey : Colors.white,
               ),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Checkbox(value: false, onChanged: (_) {}),
-                IconButton(icon: const Icon(Icons.delete), onPressed: () {}),
+                Checkbox(value: workout.isCompleted, onChanged: (_) {
+                  ref.read(workoutProvider.notifier).toggleWorkoutStatus(workout.id);
+                }),
+                IconButton(icon: const Icon(Icons.delete), onPressed: () {
+                  ref.read(workoutProvider.notifier).removeWorkout(workout.id);
+                }),
               ],
             ),
           ),
