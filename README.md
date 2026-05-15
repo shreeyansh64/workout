@@ -1,17 +1,14 @@
-# workout_app
+# Workout Tracker App
 
-A new Flutter project.
+A Flutter app to track workouts, mark completion, and view progress with a simple activity graph. It also shows random motivational quotes using an API.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+* Add / delete / complete workouts
+* Upper & Lower body split
+* 30-day activity graph
+* Random quote generator
 
-A few resources to get you started if this is your first Flutter project:
+## Tech
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Flutter • Riverpod • HTTP • Go
