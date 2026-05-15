@@ -1,3 +1,4 @@
+import 'package:fitness_tracker_app/providers/quote/quote_provider.dart';
 import 'package:fitness_tracker_app/providers/workout/workout_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,12 +17,29 @@ class WorkoutListScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const SizedBox.shrink(),
           toolbarHeight: 170,
-          flexibleSpace: const SafeArea(
+          flexibleSpace: SafeArea(
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: EdgeInsets.only(bottom: 56.0, left: 16.0, right: 16.0),
-                child: WorkoutCalendarGraph(),
+                child: Column(
+                  children: [
+                    Consumer(
+                      builder: (_, WidgetRef ref, __) {
+                        final quote = ref.watch(getQuotesProvider);
+                        return quote.map(data: (data) {
+                          return Center(child: Text(data.value.quote, maxLines: 2,));
+                        }, error: (err) {
+                          return Text("Failed to load quote");
+                        }, loading: (_) {
+                          return CircularProgressIndicator();
+                        });
+                      },
+                    ),
+                    Spacer(),
+                    WorkoutCalendarGraph(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -76,7 +94,11 @@ class WorkoutListScreen extends ConsumerWidget {
     ref.read(workoutProvider.notifier).clearCompletedWorkouts();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Center(child: Text("Refreshed workouts", style: TextStyle(color: Colors.white),)),
+        content: const Center(
+            child: Text(
+          "Refreshed workouts",
+          style: TextStyle(color: Colors.white),
+        )),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.black.withOpacity(0.3),
         duration: const Duration(seconds: 1),
