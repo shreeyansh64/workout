@@ -95,7 +95,7 @@ class WorkoutListScreen extends ConsumerWidget {
               height: 10,
             ),
             FloatingActionButton(
-              onPressed: () => _fetchQuote(ref, context),
+              onPressed: () => _fetchQuote(ref),
               child: const Icon(Icons.format_quote),
             ),
             SizedBox(
@@ -140,23 +140,8 @@ class WorkoutListScreen extends ConsumerWidget {
     );
   }
 
-  void _fetchQuote(WidgetRef ref, context) async{
+  void _fetchQuote(WidgetRef ref) async{
     final _ = ref.refresh(getQuotesProvider);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Center(
-            child: Text(
-          "Fetching new quote...",
-          style: TextStyle(color: Colors.white),
-        )),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.black.withOpacity(0.3),
-        duration: const Duration(seconds: 1),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-    );
   }
 }
 
