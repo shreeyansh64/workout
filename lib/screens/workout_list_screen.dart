@@ -5,11 +5,11 @@ import '../enums/workout_type.dart';
 import '../widgets/workout_calendar_graph.dart';
 import '../widgets/workout_form_dialog.dart';
 
-class WorkoutListScreen extends StatelessWidget {
+class WorkoutListScreen extends ConsumerWidget {
   const WorkoutListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -41,9 +41,25 @@ class WorkoutListScreen extends StatelessWidget {
             _WorkoutList(type: WorkoutType.lowerBody),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showAddWorkoutDialog(context),
-          child: const Icon(Icons.add),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              onPressed: () => _refreshWorkouts(ref, context),
+              child: const Icon(Icons.refresh),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            FloatingActionButton(
+              onPressed: () => _showAddWorkoutDialog(context),
+              child: const Icon(Icons.add),
+            ),
+            SizedBox(
+              height: 10,
+            )
+          ],
         ),
       ),
     );
@@ -53,6 +69,21 @@ class WorkoutListScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => const WorkoutFormDialog(),
+    );
+  }
+
+  void _refreshWorkouts(WidgetRef ref, context) {
+    ref.read(workoutProvider.notifier).clearCompletedWorkouts();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Center(child: Text("Refreshed workouts", style: TextStyle(color: Colors.white),)),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.black.withOpacity(0.3),
+        duration: const Duration(seconds: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
     );
   }
 }
@@ -83,7 +114,9 @@ class _WorkoutList extends ConsumerWidget {
               workout.name,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                decoration: workout.isCompleted ? TextDecoration.lineThrough : TextDecoration.none,
+                decoration: workout.isCompleted
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
                 color: workout.isCompleted ? Colors.grey : Colors.white,
               ),
             ),
@@ -92,6 +125,9 @@ class _WorkoutList extends ConsumerWidget {
                   ? "${workout.sets} sets x ${workout.reps} reps @ ${workout.weight} kg"
                   : "No sets added",
               style: TextStyle(
+                decoration: workout.isCompleted
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
                 fontWeight: FontWeight.w500,
                 color: workout.isCompleted ? Colors.grey : Colors.white,
               ),
@@ -99,12 +135,20 @@ class _WorkoutList extends ConsumerWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Checkbox(value: workout.isCompleted, onChanged: (_) {
-                  ref.read(workoutProvider.notifier).toggleWorkoutStatus(workout.id);
-                }),
-                IconButton(icon: const Icon(Icons.delete), onPressed: () {
-                  ref.read(workoutProvider.notifier).removeWorkout(workout.id);
-                }),
+                Checkbox(
+                    value: workout.isCompleted,
+                    onChanged: (_) {
+                      ref
+                          .read(workoutProvider.notifier)
+                          .toggleWorkoutStatus(workout.id);
+                    }),
+                IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      ref
+                          .read(workoutProvider.notifier)
+                          .removeWorkout(workout.id);
+                    }),
               ],
             ),
           ),
