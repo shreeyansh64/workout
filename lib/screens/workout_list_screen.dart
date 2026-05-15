@@ -1,5 +1,6 @@
 import 'package:fitness_tracker_app/providers/quote/quote_provider.dart';
 import 'package:fitness_tracker_app/providers/workout/workout_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../enums/workout_type.dart';
@@ -11,6 +12,7 @@ class WorkoutListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final loader = CupertinoActivityIndicator(radius: 20,);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -27,29 +29,35 @@ class WorkoutListScreen extends ConsumerWidget {
                     Consumer(
                       builder: (_, WidgetRef ref, __) {
                         final quote = ref.watch(getQuotesProvider);
-                        return quote.map(data: (data) {
-                          return Column(
-                            children: [
-                              Center(
-                                  child: Text(
-                                '" ${data.value.quote} "',
-                                // maxLines: 2,
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic, fontSize: 15),
-                              )),
-                              Center(
-                                  child: Text(
-                                '- ${data.value.author}',
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic, fontSize: 13),
-                              ))
-                            ],
-                          );
-                        }, error: (err) {
-                          return Text("Failed to load quote");
-                        }, loading: (_) {
-                          return CircularProgressIndicator();
-                        });
+                        return quote.map(
+                          data: (data) {
+                            return Column(
+                              children: [
+                                Center(
+                                    child: Text(
+                                  '" ${data.value.quote} "',
+                                  // maxLines: 2,
+                                  style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 15),
+                                )),
+                                Center(
+                                    child: Text(
+                                  '- ${data.value.author}',
+                                  style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 13),
+                                ))
+                              ],
+                            );
+                          },
+                          error: (error) {
+                            return Text("Failed to load quote");
+                          },
+                          loading: (_) {
+                            return loader;
+                          },
+                        );
                       },
                     ),
                     Spacer(),
@@ -87,6 +95,13 @@ class WorkoutListScreen extends ConsumerWidget {
               height: 10,
             ),
             FloatingActionButton(
+              onPressed: () => _fetchQuote(ref, context),
+              child: const Icon(Icons.format_quote),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            FloatingActionButton(
               onPressed: () => _showAddWorkoutDialog(context),
               child: const Icon(Icons.add),
             ),
@@ -113,6 +128,25 @@ class WorkoutListScreen extends ConsumerWidget {
         content: const Center(
             child: Text(
           "Refreshed workouts",
+          style: TextStyle(color: Colors.white),
+        )),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.black.withOpacity(0.3),
+        duration: const Duration(seconds: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    );
+  }
+
+  void _fetchQuote(WidgetRef ref, context) async{
+    final _ = ref.refresh(getQuotesProvider);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Center(
+            child: Text(
+          "Fetching new quote...",
           style: TextStyle(color: Colors.white),
         )),
         behavior: SnackBarBehavior.floating,
