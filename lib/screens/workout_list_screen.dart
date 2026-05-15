@@ -16,7 +16,7 @@ class WorkoutListScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const SizedBox.shrink(),
-          toolbarHeight: 170,
+          toolbarHeight: 200,
           flexibleSpace: SafeArea(
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -28,7 +28,23 @@ class WorkoutListScreen extends ConsumerWidget {
                       builder: (_, WidgetRef ref, __) {
                         final quote = ref.watch(getQuotesProvider);
                         return quote.map(data: (data) {
-                          return Center(child: Text(data.value.quote, maxLines: 2,));
+                          return Column(
+                            children: [
+                              Center(
+                                  child: Text(
+                                '" ${data.value.quote} "',
+                                // maxLines: 2,
+                                style: TextStyle(
+                                    fontStyle: FontStyle.italic, fontSize: 15),
+                              )),
+                              Center(
+                                  child: Text(
+                                '- ${data.value.author}',
+                                style: TextStyle(
+                                    fontStyle: FontStyle.italic, fontSize: 13),
+                              ))
+                            ],
+                          );
                         }, error: (err) {
                           return Text("Failed to load quote");
                         }, loading: (_) {
